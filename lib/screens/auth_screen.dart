@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'package:chat_app/widgets/auth/auth_form.dart';
-import 'package:flutter/services.dart';
 
 class AuthScreen extends StatefulWidget {
   @override
@@ -11,6 +11,7 @@ class AuthScreen extends StatefulWidget {
 
 class _AuthScreenState extends State<AuthScreen> {
   final _auth = FirebaseAuth.instance;
+  var _isLoading = false;
   void _submitAuthForm(
     String email,
     String username,
@@ -20,6 +21,9 @@ class _AuthScreenState extends State<AuthScreen> {
   ) async {
     UserCredential userCredential;
     try {
+      setState(() {
+        _isLoading = true;
+      });
       if (isLogin) {
         userCredential = await _auth.signInWithEmailAndPassword(
           email: email,
@@ -30,17 +34,30 @@ class _AuthScreenState extends State<AuthScreen> {
           email: email,
           password: password,
         );
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(userCredential.user.uid)
+            .set({
+          'username': username,
+          'email': email,
+        });
       }
-    } on PlatformException catch (error) {
+    } on FirebaseAuthException catch (error) {
       var message = "An error occured, please check your credentials!";
       if (error.message != null) message = error.message;
-      Scaffold.of(context).showSnackBar(
+      Scaffold.of(ctx).showSnackBar(
         SnackBar(
           content: Text(message),
           backgroundColor: Theme.of(ctx).errorColor,
         ),
       );
+      setState(() {
+        _isLoading = false;
+      });
     } catch (error) {
+      setState(() {
+        _isLoading = false;
+      });
       print(error);
     }
   }
@@ -50,7 +67,7 @@ class _AuthScreenState extends State<AuthScreen> {
     return Scaffold(
       backgroundColor: Theme.of(context).primaryColor,
       body: Container(
-        child: AuthForm(_submitAuthForm),
+        child: AuthForm(_submitAuthForm, _isLoading),
         decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topRight,

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:email_validator/email_validator.dart';
 
 class AuthForm extends StatefulWidget {
+  final bool isLoading;
   final void Function(
     String email,
     String username,
@@ -9,7 +10,7 @@ class AuthForm extends StatefulWidget {
     bool isLogin,
     BuildContext ctx,
   ) submitFn;
-  AuthForm(this.submitFn);
+  AuthForm(this.submitFn, this.isLoading);
 
   @override
   _AuthFormState createState() => _AuthFormState();
@@ -116,7 +117,16 @@ class _AuthFormState extends State<AuthForm> {
                     ),
                     ElevatedButton(
                       onPressed: _trySubmit,
-                      child: Text(_isLogin ? "Login" : "Signup"),
+                      child: widget.isLoading
+                          ? SizedBox(
+                              height: 20,
+                              width: 20,
+                              child: CircularProgressIndicator(
+                                valueColor:
+                                    AlwaysStoppedAnimation<Color>(Colors.white),
+                              ),
+                            )
+                          : Text(_isLogin ? "Login" : "Signup"),
                     ),
                     TextButton(
                       onPressed: () {
