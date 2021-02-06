@@ -31,6 +31,7 @@ dependencies:
   cloud_firestore: ^0.16.0
   firebase_auth: ^0.20.0+1
   firebase_core: ^0.7.0
+  email_validator: ^1.0.6
 
 dev_dependencies:
   flutter_test:
